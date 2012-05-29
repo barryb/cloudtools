@@ -8,6 +8,11 @@ LOGFILE="/tmp/boot.log"
 	echo "gem: --no-ri --no-rdoc" >> ~/.gemrc
 	
 	yum -y update
+
+	# Need Mysqldump for backing update
+	
+	yum install mysql51
+	
 	yum -y install rubygems
 	gem update --system
 	
