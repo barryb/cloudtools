@@ -20,6 +20,7 @@ LOGFILE="/tmp/boot.log"
 	
 	# Prevent ssh timeouts for routers that dump idle sessions too quickly
 	echo "ClientAliveInterval 60" >> /etc/ssh/sshd_config
+	/etc/init.d/sshd restart
 	
 	echo "Initial Setup Done -  $(date -R)!"
 	
