@@ -11,7 +11,7 @@ LOGFILE="/tmp/boot.log"
 
 	# Need Mysqldump for backing update
 	
-	yum install mysql51
+	yum -y install mysql51
 	
 	yum -y install rubygems
 	gem update --system
