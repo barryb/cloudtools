@@ -14,7 +14,7 @@ config = YAML::load( File.open( '/etc/cloudtools/rds_backup_cfg.yml' ) )
 
 aws_key=creds["aws_key"];
 aws_secret=creds["aws_secret"];
-rsp_key=creds["rsp_key_key"];
+rsp_key=creds["rsp_key"];
 rsp_secret=creds["rsp_secret"];
 
 rds = RightAws::RdsInterface.new(
