@@ -39,9 +39,16 @@ rackspace_container_name = config['rackspace_container_name']
 
 temp_db_id = "#{orig_db_id}-tempsnap"
 
-#result = rds.describe_db_instances('nosuchdb')
-#puts result.inspect
-#exit 1
+current_instances = rds.describe_db_instances()
+
+result =  current_instances.select { |i| i[:aws_id] == temp_db_id }
+matched = result.count
+
+if matched > 0
+        puts "Temp database \'#{temp_db_id}\' already exists"
+        puts "Either fix the config, or rename/remove the database"
+        exit 1
+end
 
 result = rds.describe_db_instances(orig_db_id)
 restorable_time = result.first[:latest_restorable_time]
@@ -171,8 +178,14 @@ puts "Backup Finished"
 puts "Preparing to delete RDS Instance: #{temp_db_id}"
 sleep 5
 result = rds.delete_db_instance(temp_db_id, :skip_final_snapshot => true)
+
+# Remove IP from the backup group - we can add it back on next run
+# Might be running from a different ip next time!
+
+result = rds.revoke_db_security_group_ingress(rds_security_group, :cidrip => my_cidr)
 sleep 1
 puts "Database Server Deleted"
+puts "IP removed from backup security group"
 
 puts "Preparing to zip database"
 sleep 5
