@@ -12,6 +12,12 @@ LOGFILE="/tmp/setup.log"
 	# Don't bother installing gem docs
 	echo "gem: --no-ri --no-rdoc" >> ~/.gemrc
 	
+	SCRIPT_DIR=/usr/local/scripts/
+	CT_PATH=/REPOS_PATH/cloudtools
+	
+	mkdir -p "$SCRIPT_DIR/rds-backup"
+	ln -s $CT_PATH/scripts/* $SCRIPT_DIR/rds-backup
+		
 	# Add relevant ssh public keys for access	
 	cat /usr/local/repos/cloudtools/public_keys/bb-id_rsa.pub >> ~ec2-user/.ssh/authorized_keys
 	
