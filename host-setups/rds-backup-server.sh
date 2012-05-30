@@ -23,6 +23,12 @@ LOGFILE="/tmp/boot.log"
 	gem sources -a http://gemcutter.org/
 	gem install cloudfiles 
 	
+	# Add relevant ssh public keys for access	
+	cat /usr/local/repos/cloudfiles/public_keys/bb-id_rsa.pub >> ~ec2-user/.ssh/authorized_keys
+	
+	# Remove ls coloring
+	echo "unalias ls" >> ~ec2-user/.bash_profile
+	
 	# Prevent ssh timeouts for routers that dump idle sessions too quickly
 	echo "ClientAliveInterval 60" >> /etc/ssh/sshd_config
 	/etc/init.d/sshd restart
