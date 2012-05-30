@@ -58,15 +58,6 @@ dump_filename="#{orig_db_id}-#{database_name}-#{restorable_time}.sql"
 dump_gzipname="#{dump_filename}.gz"
 
 
-db_save_dir="/mnt/db_backups"
-db_save_base="#{orig_db_id}-#{database_name}-#{restorable_time}.sql"
-db_save_file="#{db_save_dir}/#{db_save_base}"
-db_save_zip="#{db_save_file}.gz"
-
-
-#exit 1
-
-
 #
 # Extend the class to yield a power status
 #
@@ -210,7 +201,7 @@ puts "Done."
 
 # Last parameter set to true would mean use rackspace private addressing, but we are not local to rackspace
 
-cf = CloudFiles::Connection.new(rds_key, rds_secret, true, false)
+cf = CloudFiles::Connection.new(rsp_key, rsp_secret, true, false)
 
 container = cf.container(rackspace_container_name)
 
