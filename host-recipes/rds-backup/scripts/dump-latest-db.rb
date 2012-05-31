@@ -211,7 +211,10 @@ object = container.create_object(dump_gzipname)
 object.load_from_filename("#{scratch_dir}/#{dump_gzipname}")
 
 puts "Done"
-
+puts "Shutting down in 1 minute"
+line="/sbin/shutdown -P +1"
+system(line)
+puts "Goodbye cruel world!"
 exit 1
 
 
