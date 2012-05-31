@@ -109,7 +109,8 @@ puts "Creating new RDS instance from latest available snapshot"
 result = rds.restore_db_instance_to_point_in_time(
 	orig_db_id,
 	temp_db_id, 
-	{ :use_latest_restorable_time=>"true" }
+	{ :use_latest_restorable_time=>"true",
+	  :instance_class=>"db.m1.small" }
 	)
 	
 	
@@ -212,8 +213,7 @@ object.load_from_filename("#{scratch_dir}/#{dump_gzipname}")
 
 puts "Done"
 puts "Shutting down in 1 minute"
-line="/sbin/shutdown -P +1"
-system(line)
+fork { system("/sbin/shutdown -P +1") }
 puts "Goodbye cruel world!"
 exit 1
 
