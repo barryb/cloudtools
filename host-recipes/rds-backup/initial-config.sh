@@ -12,8 +12,8 @@ LOGFILE="/tmp/setup.log"
 	# Don't bother installing gem docs
 	echo "gem: --no-ri --no-rdoc" >> ~/.gemrc
 	
-	SCRIPT_DIR=/usr/local/scripts/
-	CT_PATH=/REPOS_PATH/cloudtools
+	SCRIPT_DIR=/usr/local/scripts
+	CT_PATH=$REPOS_PATH/cloudtools
 	
 	mkdir -p "$SCRIPT_DIR/rds-backup"
 	ln -s $CT_PATH/scripts/* $SCRIPT_DIR/rds-backup
