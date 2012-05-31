@@ -16,10 +16,13 @@ LOGFILE="/tmp/setup.log"
 	CT_PATH=$REPOS_PATH/cloudtools
 	
 	mkdir -p "$SCRIPT_DIR/rds-backup"
-	ln -s $CT_PATH/scripts/* $SCRIPT_DIR/rds-backup
+	for f in $(ls -d /usr/local/repos/cloudtools/host-recipes/rds-backup/scripts/*); do
+		ln -s $f /usr/local/scripts/rds-backup;
+	done
+	# ln -s $CT_PATH/scripts/* $SCRIPT_DIR/rds-backup
 		
 	# Add relevant ssh public keys for access	
-	cat /usr/local/repos/cloudtools/public_keys/bb-*id_rsa.pub >> ~ec2-user/.ssh/authorized_keys
+	cat /usr/local/repos/cloudtools/public_keys/bb_*id_rsa.pub >> ~ec2-user/.ssh/authorized_keys
 	
 	# Remove ls coloring
 	echo "unalias ls" >> ~ec2-user/.bash_profile
