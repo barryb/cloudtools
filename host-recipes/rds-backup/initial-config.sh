@@ -19,7 +19,7 @@ LOGFILE="/tmp/setup.log"
 	ln -s $CT_PATH/scripts/* $SCRIPT_DIR/rds-backup
 		
 	# Add relevant ssh public keys for access	
-	cat /usr/local/repos/cloudtools/public_keys/bb-id_rsa.pub >> ~ec2-user/.ssh/authorized_keys
+	cat /usr/local/repos/cloudtools/public_keys/bb-*id_rsa.pub >> ~ec2-user/.ssh/authorized_keys
 	
 	# Remove ls coloring
 	echo "unalias ls" >> ~ec2-user/.bash_profile
