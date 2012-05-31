@@ -10,7 +10,7 @@ require 'cloudfiles'
 # config will contain options applicable to the backup job
 
 creds = YAML::load( File.open( '/etc/cloudtools/cloud_creds.yml' ) )
-config = YAML::load( File.open( '/etc/cloudtools/rds_backup_cfg.yml' ) )
+config = YAML::load( File.open( '/etc/cloudtools/rds_config.yml' ) )
 
 aws_key=creds["aws_key"];
 aws_secret=creds["aws_secret"];
