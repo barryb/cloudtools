@@ -51,7 +51,7 @@ initial_config_script = <<EOS
 	yum -y install git
 	mkdir -p #{repos_path}
 	cd #{repos_path}
-	git clone https://github.com/barryb/cloudtools.git -b production
+	git clone https://github.com/barryb/cloudtools.git
 	#{repos_path}/cloudtools/host-recipes/rds-backup/initial-config.sh	
 ) >> /tmp/setup.log
 EOS
