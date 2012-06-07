@@ -9,6 +9,10 @@ creds = YAML::load( File.open( '/etc/cloudtools/cloud_creds.yml' ) )
 aws_key=creds["aws_key"];
 aws_secret=creds["aws_secret"];
 
+if ARGV.count == 0
+	puts "Usage: start_aws_instances.rb INST_ID [ INST_ID2 INST_ID3 ... ]"
+end
+
 ec2 = RightAws::Ec2.new(
 	aws_key,
 	aws_secret,
