@@ -6,13 +6,8 @@ require 'yaml'
 
 creds = YAML::load( File.open( '/etc/cloudtools/cloud_creds.yml' ) )
 
-server_name="archiver_db"
-server_creator="bb"
-
 aws_key=creds["aws_key"];
 aws_secret=creds["aws_secret"];
-
-aws_id="i-36cd2a4fXXX"
 
 ec2 = RightAws::Ec2.new(
 	aws_key,
