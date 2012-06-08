@@ -4,15 +4,52 @@ require 'rubygems'
 require 'right_aws'
 require 'yaml'
 
-creds = YAML::load( File.open( '/etc/cloudtools/cloud_creds.yml' ) )
+user_conf_file = File.expand_path "~/.cloudtools/cloud_creds.yml"
+global_conf_file = '/etc/cloudtools/cloud_creds.yml'
 
-server_name="archiver_db"
-server_creator="bb"
+if File.exist? user_conf_file
+	puts "Using user creds file"
+	creds = YAML::load( File.open( user_conf_file ) )
+elsif File.exist? global_conf_file
+	puts "Using global creds file"
+	creds = YAML::load( File.open( global_conf_file ) )
+else
+	puts "NO creds file found - Exiting."
+	exit 0
+end
 
 aws_key=creds["aws_key"];
 aws_secret=creds["aws_secret"];
 rsp_key=creds["rsp_key"];
 rsp_secret=creds["rsp_secret"];
+
+ec2 = RightAws::Ec2.new(
+	aws_key,
+	aws_secret,
+  	{:logger => Logger.new('/tmp/ec2.log')}
+  	)
+  	
+matching_instances = ec2.describe_instances(
+		:filters => {
+			'instance-state-code' => 80
+			})
+			
+p matching_instances
+
+
+
+if ARGV.count != 1
+	puts "Usage: #{$0} SERVER_NAME"
+	exit 0
+end
+
+exit 1
+
+server_name="archiver_db"
+server_creator="bb"
+repos_source='https://github.com/barryb/cloudtools.git'
+
+
 
 
 repos_path="/usr/local/repos"
@@ -51,7 +88,7 @@ initial_config_script = <<EOS
 	yum -y install git
 	mkdir -p #{repos_path}
 	cd #{repos_path}
-	git clone https://github.com/barryb/cloudtools.git
+	git clone #{repos_source}
 	#{repos_path}/cloudtools/host-recipes/rds-backup/initial-config.sh	
 ) >> /tmp/setup.log
 EOS
