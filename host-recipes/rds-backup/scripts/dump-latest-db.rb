@@ -10,7 +10,11 @@ require 'date'
 # creds will contain access credentials for both Amazon and Rackspace services
 # config will contain options applicable to the backup job
 
-max_object_age = 9
+# Delete objects older than this in the backup bucket
+# Currently only pruning rackspace
+# Need to add S3 too
+
+max_object_age = 60
 
 creds = YAML::load( File.open( '/etc/cloudtools/cloud_creds.yml' ) )
 config = YAML::load( File.open( '/etc/cloudtools/rds_config.yml' ) )
@@ -215,7 +219,7 @@ filelist = container.objects_detail()
 filelist.each { |key, value| 
 	modified = value[:last_modified]
 	age = (DateTime.now - DateTime.strptime("#{value[:last_modified]}",'%Y-%m-%dT%H:%M:%S%z')).to_i
-	if age > max_object_age
+	if age >= max_object_age
 		puts "Deleting #{key}"
 		container.delete_object("#{key}")
 	end
