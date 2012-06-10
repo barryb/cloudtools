@@ -5,9 +5,12 @@ require 'yaml'
 require 'socket'
 require 'right_aws'
 require 'cloudfiles'
+require 'date'
 
 # creds will contain access credentials for both Amazon and Rackspace services
 # config will contain options applicable to the backup job
+
+max_object_age = 9
 
 creds = YAML::load( File.open( '/etc/cloudtools/cloud_creds.yml' ) )
 config = YAML::load( File.open( '/etc/cloudtools/rds_config.yml' ) )
@@ -32,7 +35,6 @@ database_name = config['database_name']
 scratch_dir = config['scratch']
 s3_bucket_name = config['s3_bucket_name']
 rackspace_container_name = config['rackspace_container_name']
-
 
 # Need to make sure this doesn't exist and exit if it does
 # since this gets deleted at the end of the process
@@ -205,6 +207,21 @@ puts "Done."
 cf = CloudFiles::Connection.new(rsp_key, rsp_secret, true, false)
 
 container = cf.container(rackspace_container_name)
+
+# Delete objects older than max_object_age
+
+filelist = container.objects_detail()
+
+filelist.each { |key, value| 
+	modified = value[:last_modified]
+	age = (DateTime.now - DateTime.strptime("#{value[:last_modified]}",'%Y-%m-%dT%H:%M:%S%z')).to_i
+	if age > max_object_age
+		puts "Deleting #{key}"
+		container.delete_object("#{key}")
+	end
+	}
+
+# Upload new database backup
 
 puts "Uploading file to Cloudfiles (Rackspace)"
 
