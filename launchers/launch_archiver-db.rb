@@ -4,6 +4,28 @@ require 'rubygems'
 require 'right_aws'
 require 'yaml'
 
+valid_envs = ['production', 'development']
+
+my_config = "test.yml"
+
+my_env = ENV['APPENV'].nil? ? 'development' : ENV['APPENV']
+
+if valid_envs.index(my_env).nil?
+	puts "#{my_env} is not a valid environment"
+	exit 0
+else
+	puts "Setting environment to: #{my_env}"
+
+end
+
+YAML.load_file(my_config)[my_env].each do |key, val|
+    puts "#{key}= #{val}"
+end
+
+#p config
+
+exit 1
+
 user_conf_file = File.expand_path "~/.cloudtools/cloud_creds.yml"
 global_conf_file = '/etc/cloudtools/cloud_creds.yml'
 
@@ -34,7 +56,7 @@ matching_instances = ec2.describe_instances(
 			'instance-state-code' => 80
 			})
 			
-p matching_instances
+#p matching_instances
 
 
 
@@ -43,13 +65,12 @@ if ARGV.count != 1
 	exit 0
 end
 
-exit 1
-
-server_name="archiver_db"
+server_name=ARGV.first
 server_creator="bb"
 repos_source='https://github.com/barryb/cloudtools.git'
 
-
+puts "Server name: #{server_name}"
+exit 1
 
 
 repos_path="/usr/local/repos"
