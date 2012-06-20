@@ -4,22 +4,62 @@ require 'rubygems'
 require 'right_aws'
 require 'yaml'
 require 'trollop'
+require 'zonefile'
 
 creds = YAML::load( File.open( '/etc/cloudtools/cloud_creds.yml' ) )
 
 aws_key=creds["aws_key"];
 aws_secret=creds["aws_secret"];
 
-p aws_key
-p aws_secret
-
-exit 1;
-
-r53 = RightAws::Ec2.new(
+r53 = RightAws::Route53Interface.new(
 	aws_key,
 	aws_secret,
   	{:logger => Logger.new('/tmp/ec2.log')}
   	)
+
+
+zf = Zonefile.from_file('./q-stream.net.zone')
+
+origin = zf.soa[:origin].downcase
+
+record_sets = []
+
+zf.mx.each do |record|
+	record_sets << {
+		:name => "mail.#{origin}",
+		:type => "MX",
+		:ttl => record[:ttl],
+		:resource_records => "#{record[:pri]} #{record[:host]}"
+	}
+end
+p record_sets
+#exit 1
+result = r53.create_resource_record_sets("/hostedzone/Z2BRWRE98GQIBE", record_sets, 'The MX Records')
+
+p result
+
+
+exit 1
+
+
+aws_zone_config = {
+	:name => zf.soa[:origin].downcase,
+	:config => {
+		:comment => ""
+	}
+}
+
+
+  	
+result = r53.create_hosted_zone(aws_zone_config)
+
+aws_id = result[:aws_id]
+
+puts "ID: #{aws_id}"
+
+p result
+
+exit 1
   	
 ARGV.each do|i|
 	# Assume each argument is an instance ID
