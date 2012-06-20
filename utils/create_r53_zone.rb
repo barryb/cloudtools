@@ -14,29 +14,65 @@ aws_secret=creds["aws_secret"];
 r53 = RightAws::Route53Interface.new(
 	aws_key,
 	aws_secret,
-  	{:logger => Logger.new('/tmp/ec2.log')}
+  	{:logger => Logger.new('/tmp/r53.log')}
   	)
-
-
-zf = Zonefile.from_file('./q-stream.net.zone')
-
-origin = zf.soa[:origin].downcase
 
 record_sets = []
 
-zf.mx.each do |record|
-	record_sets << {
-		:name => "mail.#{origin}",
-		:type => "MX",
-		:ttl => record[:ttl],
-		:resource_records => "#{record[:pri]} #{record[:host]}"
-	}
-end
-p record_sets
-#exit 1
-result = r53.create_resource_record_sets("/hostedzone/Z2BRWRE98GQIBE", record_sets, 'The MX Records')
+zf = Zonefile.from_file('./q-stream.net.zone')
+origin = zf.soa[:origin].downcase
 
-p result
+# Do MX Records
+# Route 53 only lets you have a single MX record set with multiple host/priority pairs
+
+res_recs = []
+mx_ttl = zf.soa[:ttl]
+
+zf.mx.each do |record|
+	res_recs << "#{record[:pri]} #{record[:host]}"
+	mx_ttl = record[:ttl]
+end
+
+record_sets << {
+	:name => origin,
+	:ttl => mx_ttl,
+	:type => "MX",
+	:resource_records => res_recs
+}
+
+# A records 
+# This will break if there are multiple IPs for a hostname
+# zonefile gem doesn't really deal with these
+
+zf.a.each do |record|
+	record_sets << {
+		:name => record[:name] == '@' ? origin : "#{record[:name]}.#{origin}",
+		:ttl => record[:ttl],
+		:type => "A",
+		:resource_records => record[:host] == '@' ? ["#{origin}"] : ["#{record[:host]}"]
+	}
+
+end
+
+
+# CNAMES
+
+zf.cname.each do |record|
+	record_sets << {
+		:name => record[:name] == '@' ? origin : "#{record[:name]}.#{origin}",
+		:ttl => record[:ttl],
+		:type => "CNAME",
+		:resource_records => record[:host] == '@' ? ["#{origin}"] : ["#{record[:host]}"]
+	}
+
+end
+
+p record_sets
+
+
+result = r53.create_resource_record_sets("/hostedzone/Z2BRWRE98GQIBE", record_sets)
+
+#p result
 
 
 exit 1
