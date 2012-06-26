@@ -16,11 +16,40 @@ r53 = RightAws::Route53Interface.new(
 	aws_secret,
   	{:logger => Logger.new('/tmp/r53.log')}
   	)
+  	
+
+
 
 record_sets = []
 
-zf = Zonefile.from_file('./q-stream.net.zone')
+zf = Zonefile.from_file('./qstream.com.zone')
 origin = zf.soa[:origin].downcase
+
+
+aws_zone_config = {
+	:name => origin,
+	:config => {
+		:comment => ""
+	}
+}
+
+
+  	
+result = r53.create_hosted_zone(aws_zone_config)
+
+aws_id = result[:aws_id]
+
+
+
+zf.txt.each do |record|
+	record_sets << {
+		:name => record[:name] == '@' ? origin : "#{record[:name]}.#{origin}",
+		:ttl => record[:ttl],
+		:type => "TXT",
+		:resource_records => record[:text] == '@' ? ["#{origin}"] : ["#{record[:text]}"]
+	}
+
+end
 
 # Do MX Records
 # Route 53 only lets you have a single MX record set with multiple host/priority pairs
@@ -67,10 +96,12 @@ zf.cname.each do |record|
 
 end
 
-p record_sets
+#p record_sets
 
 
-result = r53.create_resource_record_sets("/hostedzone/Z2BRWRE98GQIBE", record_sets)
+
+
+ result = r53.create_resource_record_sets(aws_id, record_sets)
 
 #p result
 
