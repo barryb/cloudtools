@@ -16,6 +16,10 @@ require 'date'
 
 max_object_age = 60
 
+# Wait this long for restore from rds snapshot in minutes
+timeout_wait_for_rds = 40
+
+
 creds = YAML::load( File.open( '/etc/cloudtools/cloud_creds.yml' ) )
 config = YAML::load( File.open( '/etc/cloudtools/rds_config.yml' ) )
 
@@ -124,9 +128,10 @@ result = rds.restore_db_instance_to_point_in_time(
 #	
 # Wait for 10 minutes, then check every minute before giving up after another ten minutes
 #
-timeout = 20
+timeout = timeout_wait_for_rds - 10
+
 puts "Waiting an initial ten minutes before checking if DB is up..."
-puts "Will wait for a further 20 minutes checking at 1 minute intervals"
+puts "Will then wait for a further #{timeout} minutes checking at 1 minute intervals"
 
 sleep 600
 until timeout == 0 || rds.power_status(temp_db_id) == "available"
@@ -154,8 +159,26 @@ result = rds.modify_db_instance(
 	:master_user_password => new_master_password,
 	:db_security_groups => ['default', rds_security_group] )
 
-sleep 60
+
+
+
+#	
+# Wait for 11 minutes for DB to be ready, checking every minute
+#
+
 puts "Waiting 60s before dumping database"
+sleep 60
+
+timeout=10
+puts "Waiting a further ten minutes before checking if DB is available"
+puts "Checking every minute"
+
+until timeout == 0 || rds.power_status(temp_db_id) == "available"
+	puts "waiting another 60 seconds for #{temp_db_id}"
+	sleep 60
+	timeout -= 1
+end
+
 
 
 result = rds.describe_db_instances(temp_db_id)
