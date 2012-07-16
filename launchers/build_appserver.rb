@@ -4,7 +4,11 @@ require 'rubygems'
 require 'right_aws'
 require 'yaml'
 
-creds = YAML::load( File.open( '/etc/cloudtools/cloud_creds.yml' ) )
+creds_file = File.expand_path "~/.cloudtools/cloud_creds.yml"
+
+#creds = YAML::load( File.open( '/etc/cloudtools/cloud_creds.yml' ) )
+
+creds = YAML::load( File.open( creds_file ) )
 
 server_name="bb-app1"
 server_creator="bb"
@@ -23,10 +27,14 @@ aws_key: #{aws_key}
 aws_secret: #{aws_secret}
 EOS
 
-rsa_file = File.expand_path "~/.ssh/qs_deplay_rsa"
+#rsa_file = File.expand_path "~/.ssh/qs_deplay_rsa"
+rsa_file = File.expand_path "~/.ssh/id_rsa"
 id_rsa = File.read(rsa_file)
 
+pub_file = File.expand_path "~/.ssh/id_rsa.pub"
+pub_key = File.read(pub_file)
 
+# StrictHostKeyChecking no
 
 
 initial_config_script = <<EOS
@@ -34,12 +42,16 @@ initial_config_script = <<EOS
 (
 
 	# Prevent ssh timeouts for routers that dump idle sessions too quickly
+	
 	echo "ClientAliveInterval 60" >> /etc/ssh/sshd_config
 	/etc/init.d/sshd restart
 	
-	export REPOS_PATH="#{repos_path}"
+	# Prevent SSH prompting to add key
+	
+	echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
+	
 	export CLOUD_DIR="#{cloud_dir}"
-	export APPS_DIR="#{cloud_dir}"
+	export APPS_DIR="#{apps_dir}"
 	
 	echo "Starting Initial Configuration - The time is now $(date -R)!"
 	mkdir -p "#{cloud_dir}"
@@ -47,9 +59,12 @@ initial_config_script = <<EOS
 	
 	echo "#{cloud_yaml}" >> #{cloud_config}
 	echo "#{id_rsa}" >> ~/.ssh/id_rsa
+	chmod 600 ~/.ssh/id_rsa
+	echo "#{pub_key}" >> ~ec2-user/.ssh/authorized_keys
 	yum -y install git
-	mkdir -p #{repos_path}
-	cd #{repos_path}
+
+	cd #{apps_dir}
+	git clone git@github.com:qstream/spaced-ed.git
 	
 ) >> /tmp/setup.log
 EOS
