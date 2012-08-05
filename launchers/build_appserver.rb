@@ -27,8 +27,8 @@ aws_key: #{aws_key}
 aws_secret: #{aws_secret}
 EOS
 
-#rsa_file = File.expand_path "~/.ssh/qs_deplay_rsa"
-rsa_file = File.expand_path "~/.ssh/id_rsa"
+rsa_file = File.expand_path "~/.ssh/qs_deploy_rsa"
+#rsa_file = File.expand_path "~/.ssh/id_rsa"
 id_rsa = File.read(rsa_file)
 
 pub_file = File.expand_path "~/.ssh/id_rsa.pub"
